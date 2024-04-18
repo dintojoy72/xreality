@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Interactive 3D Bar Chart</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+<body style="background-color:black">
+    <a-scene>
+        <!-- Camera + Cursor for Desktop Browsing -->
+        <a-camera position="-5 4 12">
+            <a-cursor></a-cursor>
+        </a-camera>
+        <!-- Base for the bar chart -->
+        <a-plane position="-6 0 -4" rotation="-70 0 0" width="25" height="10" depth="50" color="#FFFFFF"></a-plane>
+
+
+        <!-- Legend -->
+        <a-plane position="10 8.5 0" rotation="0 0 0" width="4" height="2" depth="0.1" color="#FFFFFF"></a-plane>
+        <a-text position="10 8 0" value="Legend" color="#FFFFFF" align="center"></a-text>
+        <!-- Legend for Value 1 -->
+        <a-box position="9 8 0" width="0.5" height="0.5" depth="0.5" color="rgb(97, 10, 72)"></a-box>
+        <a-text position="10 8 0" value="Value 1" color="#000"></a-text>
+        <!-- Legend for Value 2 -->
+        <a-box position="9 8.5 0" width="0.5" height="0.5" depth="0.5" color="#FA2FBD"></a-box>
+        <a-text position="10 8.5 0" value="Value 2" color="#000"></a-text>
+        <!-- Legend for Value 3 -->
+        <a-box position="9 9 0" width="0.5" height="0.5" depth="0.5" color="#FB94DC"></a-box>
+        <a-text position="10 9 0" value="Value 3" color="#000"></a-text>
+
+        <!-- Tooltip -->
+        <a-plane id="tooltip" visible="false" width="1.5" height="1" color="#FFFFFF" opacity="0.9"></a-plane>
+        <a-text id="tooltipText" visible="false"  position="0 0 0" align="center" value="" color="black"></a-text>
+    </a-scene>
+
+    <script>
+        const matrixData = [
+            { date: "2024-01-01", value1: 10, value2: 5, value3: 2  },
+            { date: "2024-01-02", value1: 7, value2: 3, value3: 1 },
+            { date: "2024-01-01", value1: 11, value2: 8 , value3: 5 },
+            { date: "2024-01-02", value1: 6, value2: 4, value3: 2  },
+            { date: "2024-01-01", value1: 9, value2: 5, value3: 3 },
+            { date: "2024-01-02", value1: 12, value2: 6, value3: 4  },
+            // Add more data as needed
+        ];
+
+        window.onload = function() {
+            const sceneEl = document.querySelector('a-scene'); // Get the scene
+
+            matrixData.forEach((item, index) => {
+                let xPos = index * -2.5; // Simple positioning, adjust as needed
+
+                // Create bar for value1
+                let bar1 = document.createElement('a-box');
+                bar1.setAttribute('position', `${xPos} ${item.value1 / 2} -4`);
+                bar1.setAttribute('height', `${item.value1}`);
+                bar1.setAttribute('width', "1.1");
+                bar1.setAttribute('depth', "1.1");
+                bar1.setAttribute('color', "rgb(97, 10, 72)");
+                bar1.setAttribute('class', 'interactive');
+                bar1.dataset.value = `${item.value1}`;
+                sceneEl.appendChild(bar1);
+
+                // Create bar for value2
+                let bar2 = document.createElement('a-box');
+                bar2.setAttribute('position', `${xPos} ${item.value2 / 2} -2.5`); // Offset Z for visibility
+                bar2.setAttribute('height', `${item.value2}`);
+                bar2.setAttribute('width', "1.1");
+                bar2.setAttribute('depth', "1.1");
+                bar2.setAttribute('color', "#FA2FBD");
+                bar2.setAttribute('class', 'interactive');
+                bar2.dataset.value = `${item.value2}`;
+                sceneEl.appendChild(bar2);
+
+                // Create bar for value3
+                let bar3 = document.createElement('a-box');
+                bar3.setAttribute('position', `${xPos} ${item.value3 / 2} -.5`); // Offset Z for visibility
+                bar3.setAttribute('height', `${item.value3}`);
+                bar3.setAttribute('width', "1.1");
+                bar3.setAttribute('depth', "1.1");
+                bar3.setAttribute('color', "#FB94DC");
+                bar3.setAttribute('class', 'interactive');
+                bar3.dataset.value = `${item.value3}`;
+                sceneEl.appendChild(bar3);
+
+                // Create text for date
+                let dateText = document.createElement('a-text');
+                dateText.setAttribute('position', `${xPos} -.2 -.1`); // Adjust Y and Z position as needed
+                dateText.setAttribute('value', `${item.date}`);
+                dateText.setAttribute('color', '#000');
+                sceneEl.appendChild(dateText);
+            });
+
+            // Tooltip
+            const tooltip = document.querySelector('#tooltip');
+            const tooltipText = document.querySelector('#tooltipText');
+
+            // Hover effect with tooltip
+            document.querySelectorAll('.interactive').forEach(el => {
+                let originalColor = el.getAttribute('color');
+                el.addEventListener('mouseenter', function () {
+                    el.setAttribute('color', 'gray'); // Change color on hover
+                    tooltip.setAttribute('position', `${this.getAttribute('position').x} ${this.getAttribute('position').y + this.getAttribute('height') / 2 + 0.5} ${this.getAttribute('position').z}`);
+                    tooltip.setAttribute('visible', 'true'); // Show tooltip
+                    tooltipText.setAttribute('position', `${this.getAttribute('position').x} ${this.getAttribute('position').y + this.getAttribute('height') / 2 + 0.5} ${this.getAttribute('position').z}`);
+                    tooltipText.setAttribute('value', this.dataset.value); // Update tooltip value
+                    tooltipText.setAttribute('visible', 'true'); // Show tooltip
+                    tooltipText.setAttribute('scale', '2 2 2'); // Show tooltip
+                });
+
+                el.addEventListener('mouseleave', function () {
+                    el.setAttribute('color', originalColor); // Restore original color
+                    tooltip.setAttribute('visible', 'false'); // Hide tooltip
+                    tooltipText.setAttribute('visible', 'false'); // Hide tooltip
+                });
+            });
+        };
+    </script>
+</body>
+</html>
